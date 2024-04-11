@@ -113,7 +113,6 @@
         libusb1
         dbus-glib
         gsettings-desktop-schemas
-        ffmpeg
         libudev0-shim
 
         # Verified games requirements
@@ -283,6 +282,9 @@
           e2fsprogs
           libgpg-error
           libjack2
+          libselinux
+          libxcrypt-legacy
+          libxcrypt
         ]
       ;
 
@@ -298,8 +300,12 @@
         name = "fhs-base-libs64";
         paths = map lib.getLib (libsFromPkgs pkgs);
         extraOutputsToInstall = [ "lib" ];
-        pathsToLink = [ "/lib" ];
+        pathsToLink = [ "/lib" "/share" ];
         ignoreCollisions = true;
+        nativeBuildInputs = [ pkgs.wrapGAppsHook ];
+        postBuild = ''
+          echo $GSETTINGS_SCHEMAS_PATH > $out/GSETTINGS_SCHEMAS_PATH
+        '';
       };
     in
     lib.mkIf config.environment.lsb.enable (lib.mkMerge [
@@ -308,6 +314,10 @@
           lib.optionalString config.environment.lsb.support32Bit
           ":${base-libs32}/lib"
         }";
+
+        environment.sessionVariables.XDG_DATA_DIRS = lib.mkIf config.environment.fhs.setSchemaPaths (
+          [ ":${lib.removeSuffix "\n" (builtins.readFile (base-libs64 + "/GSETTINGS_SCHEMAS_PATH"))}:" ]
+        );
 
         environment.etc."lsb".source = pkgs.symlinkJoin {
           name = "lsb-combined";

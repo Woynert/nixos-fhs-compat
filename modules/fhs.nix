@@ -17,6 +17,13 @@
         Useful in conjunction with environment.lsb
       '';
     };
+    setSchemaPaths = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Whether to append gtk schema paths to XDG_DATA_DIRS
+      '';
+    };
   };
   config = lib.mkIf config.environment.fhs.enable {
     systemd.tmpfiles.rules = lib.optionals config.environment.fhs.linkExes [
@@ -28,7 +35,7 @@
       "L+ /lib64   - - - - /etc/lsb/lib"
       "L+ /usr/lib - - - - /etc/lsb/lib"
     ]);
-    environment.sessionVariables.LD_LIBRARY_PATH = lib.mkIf config.environment.fhs.linkLibs ( [ "/lib" ] );
+    environment.sessionVariables.LD_LIBRARY_PATH = lib.mkIf config.environment.fhs.linkLibs ([ "/lib" ]);
     system.activationScripts.binsh = lib.mkIf config.environment.fhs.linkExes (lib.mkForce "");
     system.activationScripts.usrbinenv = lib.mkIf config.environment.fhs.linkExes (lib.mkForce "");
   };
