@@ -253,7 +253,7 @@
           #qt6.qt5compat
 
           ## Sound libraries
-          alsaLib
+          alsa-lib
           openal
 
           ## SDL
@@ -288,13 +288,13 @@
         ]
       ;
 
-      base-libs32 = pkgs.buildEnv {
+      base-libs32 = lib.mkIf config.environment.lsb.support32Bit (pkgs.buildEnv {
         name = "fhs-base-libs32";
         paths = map lib.getLib (libsFromPkgs pkgs.pkgsi686Linux);
         extraOutputsToInstall = [ "lib" ];
         pathsToLink = [ "/lib" ];
         ignoreCollisions = true;
-      };
+      });
 
       base-libs64 = pkgs.buildEnv {
         name = "fhs-base-libs64";
@@ -323,8 +323,8 @@
           name = "lsb-combined";
           paths = [
             base-libs64
-            base-libs32
-          ];
+          ]
+          ++ lib.optional config.environment.lsb.support32Bit base-libs32;
         };
 
         environment.systemPackages = with pkgs;
@@ -354,7 +354,7 @@
             bzip2
           ] ++ lib.optionals config.environment.lsb.enableDesktop [
             # Desktop
-            xdg_utils
+            xdg-utils
             xorg.xrandr
             fontconfig
             cups
@@ -369,11 +369,11 @@
         # environment.ld-linux = true;
       }
       (lib.mkIf config.environment.lsb.enableDesktop {
-        hardware.opengl.enable = lib.mkDefault true;
+        hardware.graphics.enable = lib.mkDefault true;
         hardware.pulseaudio.enable = lib.mkDefault true;
       })
       (lib.mkIf (config.environment.lsb.support32Bit && config.environment.lsb.enableDesktop) {
-        hardware.opengl.driSupport32Bit = lib.mkDefault true;
+        hardware.graphics.enable32Bit = lib.mkDefault true;
         hardware.pulseaudio.support32Bit = lib.mkDefault true;
       })
     ]);

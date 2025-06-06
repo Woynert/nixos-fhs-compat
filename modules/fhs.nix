@@ -2,6 +2,7 @@
   options.environment.fhs = {
     enable = lib.mkEnableOption
       "FHS compatibility mode (not recommended on host systems)";
+
     linkExes = lib.mkOption {
       type = lib.types.bool;
       default = true;
@@ -9,6 +10,7 @@
         Whether to link executables to /bin, /sbin and /usr/bin
       '';
     };
+
     linkLibs = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -17,6 +19,7 @@
         Useful in conjunction with environment.lsb
       '';
     };
+
     setSchemaPaths = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -25,6 +28,7 @@
       '';
     };
   };
+
   config = lib.mkIf config.environment.fhs.enable {
     systemd.tmpfiles.rules = lib.optionals config.environment.fhs.linkExes [
       "L+ /bin     - - - - /run/current-system/sw/bin"
